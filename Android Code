@@ -1,0 +1,82 @@
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    
+    checkWritingPermission();
+
+    controller = new DBController(this);
+
+    currentUserProfile = controller.getProfileLoggedIn();
+
+    System.out.println("ROOT: " + Environment.getExternalStorageDirectory().toString());
+
+    if(currentUserProfile.getIS_LOGGED_IN().equals("0")) {
+
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+
+        startActivity(intent);
+
+        finish();
+
+    }
+
+
+    System.out.println("currentUserProfile MainActivity: "+ currentUserProfile);
+
+    fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
+
+    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+    setupToolbar()
+
+    loadFirstFragment();
+
+    List citiesPH = controller.getListCityByCountry("1");
+    System.out.println("citiesPH MainActivity: "+ citiesPH);
+    System.out.println("citiesPH.size() MainActivity: "+ citiesPH.size());
+
+    // Save locations if the user is forwarder employee
+    switch (Integer.parseInt(currentUserProfile.getOWNER_TYPE())) {
+        case Common.OWNER_TYPE_FWD_EMP:
+
+            String countryID = "0";
+            switch (currentUserProfile.getCOUNTRY().trim()) {
+                case "UNITED STATES OF AMERICA":
+                    countryID = "2";
+                    break;
+                case "BRAZIL":
+                    countryID = "3";
+                    break;
+                case "AUSTRALIA":
+                    countryID = "4";
+                    break;
+                case "CANADA":
+                    countryID = "5";
+                    break;
+            }
+
+            List cities = controller.getListCityByCountry(countryID);
+            System.out.println("cities MainActivity: "+ cities);
+            System.out.println("cities.size() MainActivity: "+ cities.size());
+
+            if(citiesPH.size() == 0 || cities.size() == 0) {
+                // For Principal users only
+                if(Integer.parseInt(currentUserProfile.getFORWARDER_TYPE()) == Common.OWNER_TYPE_PRINCIPAL) {
+                    new ExportCSVToDatabase(MainActivity.this, currentUserProfile.getCOUNTRY()).execute();
+                }
+
+            }
+
+            break;
+
+            default:
+                if(citiesPH.size() == 0) {
+                    new ExportCSVToDatabase(MainActivity.this, "PHILIPPINES").execute();
+                }
+                break;
+
+    }
+
+}
