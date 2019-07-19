@@ -1,0 +1,105 @@
+    public long insertReceipt(Receipt receipt) {
+
+        System.out.print("receipt: " + receipt);
+
+        SQLiteDatabase database = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_RECEIPT_SHIPPER_ID,                  receipt.getSHIPPER_ID());
+        values.put(KEY_RECEIPT_CONSIGNEE_ID,                receipt.getCONSIGNEE_ID());
+        values.put(KEY_RECEIPT_PRINCIPALS_ID,               receipt.getPRINCIPALS_ID());
+        values.put(KEY_RECEIPT_FRANCHISEES_ID,              receipt.getFRANCHISEES_ID());
+        values.put(KEY_RECEIPT_FORWARDER_AGENTS_ID,         receipt.getFORWARDER_AGENTS_ID());
+        values.put(KEY_RECEIPT_TRANSACTION_TYPES_ID,        receipt.getTRANSACTION_TYPES_ID());
+        values.put(KEY_RECEIPT_PAYMENT_STATUS,              receipt.getPAYMENT_STATUS());
+        values.put(KEY_RECEIPT_RECEIPT_STATUS,              receipt.getRECEIPT_STATUS());
+        values.put(KEY_RECEIPT_QTY,                         receipt.getQTY());
+        values.put(KEY_RECEIPT_AMOUNT,                      receipt.getAMOUNT());
+        values.put(KEY_RECEIPT_BAL_AMOUNT,                  receipt.getBAL_AMOUNT());
+        values.put(KEY_RECEIPT_PICKUP_DATE,                 receipt.getPICKUP_DATE());
+        values.put(KEY_RECEIPT_RECEIPT_NO,                  receipt.getRECEIPT_NO());
+        values.put(KEY_RECEIPT_IS_UPLOADED,                 receipt.getIS_UPLOADED());
+        values.put(KEY_RECEIPT_UPLOAD_DATE,                 receipt.getUPLOAD_DATE());
+        values.put(KEY_RECEIPT_SERVER_RECEIPT_ID,           receipt.getSERVER_RECEIPT_ID());
+        values.put(KEY_RECEIPT_OWNER_ID,                    receipt.getOWNER_ID());
+        values.put(KEY_RECEIPT_IS_FOR_DELIVERY,             receipt.getIS_FOR_DELIVERY());
+
+        System.out.print("values: " + values);
+
+        long id = database.insert(TBL_RECEIPTS, null, values);
+
+        database.close();
+
+        return id;
+
+    }
+
+
+
+
+public ArrayList<Packag> getPackagesByOwnerID(String ownerID, String isForDelivery){
+
+        System.out.println("ownerID: " + ownerID);
+        System.out.println("isForDelivery: " + isForDelivery);
+
+        ArrayList<Packag> packagList = new ArrayList <Packag> ();
+
+        // Select All Query
+        String selectQuery = "SELECT * FROM " + TBL_PACKAGES
+                + " WHERE " + KEY_PACKAGE_OWNER_ID + " = " + ownerID
+                + " AND " + KEY_PACKAGE_IS_FOR_DELIVERY + " = " + isForDelivery;
+
+        System.out.println("selectQuery: " + selectQuery);
+
+        SQLiteDatabase database = this.getReadableDatabase();
+
+        System.out.println("database: " + database);
+
+        Cursor cursor = database.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst () ) {
+
+            do {
+                Packag pkg = new Packag();
+                    pkg.setID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_ID)));
+                    pkg.setRECEIPTS_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_RECEIPTS_ID)));
+                    pkg.setHAS_CAREOFF(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_HAS_CAREOFF)));
+                    pkg.setPACKAGE_DESCRIPTIONS_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PACKAGE_DESCRIPTIONS_ID)));
+                    pkg.setTRANSACTION_TYPES_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_TRANSACTION_TYPES_ID)));
+                    pkg.setPACKAGE_TYPES_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PACKAGE_TYPES_ID)));
+                    pkg.setPACKAGE_RATES_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PACKAGE_RATES_ID)));
+                    pkg.setDISCOUNT(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_DISCOUNT)));
+                    pkg.setTRACKING_NO(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_TRACKING_NO)));
+                    pkg.setTAGS(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_TAGS)));
+                    pkg.setSHIP_ETD(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_SHIP_ETD)));
+                    pkg.setSHIP_ETA(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_SHIP_ETA)));
+                    pkg.setDELIVERY_ETD(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_DELIVERY_ETD)));
+                    pkg.setDELIVERY_ETA(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_DELIVERY_ETA)));
+                    pkg.setPKG_DELIVERY_STATUS(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PKG_DELIVERY_STATUS)));
+                    pkg.setPKG_SUBFWD_BILL_STATUS(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PKG_SUBFWD_BILL_STATUS)));
+                    pkg.setPKG_CURR_LOCATION_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_PKG_CURR_LOCATION_ID)));
+                    pkg.setREMARKS(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_REMARKS)));
+                    pkg.setIS_UPLOADED(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_IS_UPLOADED)));
+                    pkg.setUPLOAD_DATE(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_UPLOAD_DATE)));
+                    pkg.setIS_FOR_DELIVERY(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_IS_FOR_DELIVERY)));
+                    pkg.setSERVER_PACKAGE_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_SERVER_PACKAGE_ID)));
+                    pkg.setOWNER_ID(cursor.getString(cursor.getColumnIndex(KEY_PACKAGE_OWNER_ID)));
+
+                packagList.add(pkg);
+
+            } while (cursor.moveToNext());
+
+        }
+
+        // closing connection
+        cursor.close();
+
+        database.close();
+
+        return packagList;
+    }
+    
+    
+    
